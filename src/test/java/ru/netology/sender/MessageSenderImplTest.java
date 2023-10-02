@@ -1,4 +1,4 @@
-package ru.netology;
+package ru.netology.sender;
 
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
@@ -6,7 +6,6 @@ import ru.netology.entity.Country;
 import ru.netology.entity.Location;
 import ru.netology.geo.GeoService;
 import ru.netology.i18n.LocalizationService;
-import ru.netology.sender.MessageSenderImpl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MessageSenderImplTest {
     @Test
-    void messageSenderWithMockitoRus(){
+    void messageSenderWithMockitoRus() {
         // отправляет только русский текст, если ip относится к российскому
         var geoService = Mockito.mock(GeoService.class);
         var localizationService = Mockito.mock(LocalizationService.class);
@@ -26,7 +25,7 @@ public class MessageSenderImplTest {
 
         Mockito.when(geoService.byIp(Mockito.any())).thenReturn(new Location("Moscow", Country.RUSSIA, "Lenina", 15));
         Mockito.when(localizationService.locale(Mockito.any())).thenReturn("Добро пожаловать");
-        var messageSenderImpRus = new MessageSenderImpl(geoService,localizationService);
+        var messageSenderImpRus = new MessageSenderImpl(geoService, localizationService);
 
         //expected
         var expectedRus = "Добро пожаловать";
@@ -36,8 +35,9 @@ public class MessageSenderImplTest {
 
         assertEquals(expectedRus, actualRus);
     }
+
     @Test
-    void messageSenderWithMockitoEn(){
+    void messageSenderWithMockitoEn() {
         //отправляет только английский текст, если ip относится к американскому сегменту адресов
         var geoService = Mockito.mock(GeoService.class);
         var localizationService = Mockito.mock(LocalizationService.class);
@@ -47,7 +47,7 @@ public class MessageSenderImplTest {
 
         Mockito.when(geoService.byIp(Mockito.any())).thenReturn(new Location("New York", Country.USA, " 10th Avenue", 32));
         Mockito.when(localizationService.locale(Mockito.any())).thenReturn("Welcome");
-        var messageSenderImpEn = new MessageSenderImpl(geoService,localizationService);
+        var messageSenderImpEn = new MessageSenderImpl(geoService, localizationService);
 
         //expected
         var expectedRus = "Welcome";
@@ -56,5 +56,8 @@ public class MessageSenderImplTest {
         var actualEn = messageSenderImpEn.send(headersEn);
 
         assertEquals(expectedRus, actualEn);
+        //проверка на количество вызовов
+        Mockito.verify(geoService, Mockito.times(1)).byIp(Mockito.any());
+        Mockito.verify(localizationService, Mockito.times(2)).locale(Mockito.any());
     }
 }
